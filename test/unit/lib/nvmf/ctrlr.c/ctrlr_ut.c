@@ -304,6 +304,9 @@ nvmf_bdev_ctrlr_zcopy_end(struct spdk_nvmf_request *req, bool commit)
 	spdk_nvmf_request_complete(req);
 }
 
+DEFINE_STUB_V(nvmf_ctrlr_channel_resize,
+	      (uint32_t max_ops, struct spdk_io_channel *ch));
+
 static void
 test_get_log_page(void)
 {

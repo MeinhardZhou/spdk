@@ -719,6 +719,16 @@ struct spdk_io_channel *spdk_bs_alloc_io_channel(struct spdk_blob_store *bs);
 void spdk_bs_free_io_channel(struct spdk_io_channel *channel);
 
 /**
+ * Resize the I/O channel's req mem.
+ *
+ * \param channel I/O channel to resize.
+ * \param new_max_ops the new max ops of I/O channel.
+ *
+ * \return 0 on success, -1 on failure.
+ */
+int spdk_bs_resize_io_channel(uint32_t new_max_ops, struct spdk_io_channel *channel);
+
+/**
  * Write data to a blob.
  *
  * \param blob Blob to write.

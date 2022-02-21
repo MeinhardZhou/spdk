@@ -35,6 +35,7 @@
 #include "spdk/stdinc.h"
 
 #include "spdk/blob.h"
+#include "spdk/bdev.h"
 #include "spdk/crc32.h"
 #include "spdk/env.h"
 #include "spdk/queue.h"
@@ -3127,6 +3128,48 @@ bs_channel_create(void *io_device, void *ctx_buf)
 
 	TAILQ_INIT(&channel->need_cluster_alloc);
 	TAILQ_INIT(&channel->queued_io);
+
+	return 0;
+}
+
+static int
+bs_channel_resize(uint32_t new_max_ops, void *ctx_buf)
+{
+	struct spdk_bs_channel		*channel = ctx_buf;
+	struct spdk_blob_store		*bs = channel->bs;
+	uint32_t old_max_ops = bs->max_channel_ops;
+	uint32_t i;
+	struct spdk_bs_request_set *old_req;
+
+	if (new_max_ops > old_max_ops) {
+		void *buf;
+
+		buf = realloc(channel->req_mem, sizeof(struct spdk_bs_request_set) * new_max_ops);
+		if (!buf) {
+			return -ENOMEM;
+		}
+
+		channel->req_mem = buf;
+		/* Null out new req mem */
+		for (i = old_max_ops; i < new_max_ops; i++) {
+			memset(&channel->req_mem[i], 0, sizeof(struct spdk_bs_request_set));
+		}
+
+		/* Clear reqs tailq */
+		while (!TAILQ_EMPTY(&channel->reqs)) {
+			old_req = TAILQ_FIRST(&channel->reqs);
+			TAILQ_REMOVE(&channel->reqs, old_req, link);
+		}
+
+		/* Insert tail of channel reqs queue */
+		for (i = 0; i < new_max_ops; i++) {
+			TAILQ_INSERT_TAIL(&channel->reqs, &channel->req_mem[i], link);
+		}
+
+		bs->max_channel_ops = new_max_ops;
+	}
+
+	/* Keep default ops and do nothing */
 
 	return 0;
 }
@@ -7536,6 +7579,18 @@ struct spdk_io_channel *spdk_bs_alloc_io_channel(struct spdk_blob_store *bs)
 void spdk_bs_free_io_channel(struct spdk_io_channel *channel)
 {
 	spdk_put_io_channel(channel);
+}
+
+int spdk_bs_resize_io_channel(uint32_t new_max_ops, struct spdk_io_channel *ch)
+{
+	if (ch != NULL) {
+		struct spdk_bs_channel *bs_ch = spdk_io_channel_get_ctx(ch);
+		int res = bs_channel_resize(new_max_ops, bs_ch);
+		return res;
+	}
+
+	SPDK_ERRLOG("Failed to resize bs io_channel.\n");
+	return -EINVAL;
 }
 
 void spdk_blob_io_unmap(struct spdk_blob *blob, struct spdk_io_channel *channel,

@@ -123,6 +123,9 @@ DEFINE_STUB(nvmf_ctrlr_write_zeroes_supported,
 	    (struct spdk_nvmf_ctrlr *ctrlr),
 	    false);
 
+DEFINE_STUB_V(nvmf_ctrlr_channel_resize,
+	      (uint32_t max_ops, struct spdk_io_channel *ch));
+
 DEFINE_STUB(nvmf_bdev_ctrlr_read_cmd,
 	    int,
 	    (struct spdk_bdev *bdev, struct spdk_bdev_desc *desc, struct spdk_io_channel *ch,

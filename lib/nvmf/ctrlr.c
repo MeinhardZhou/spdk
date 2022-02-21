@@ -43,6 +43,7 @@
 #include "spdk/nvme_spec.h"
 #include "spdk/nvmf_cmd.h"
 #include "spdk/string.h"
+#include "spdk/blob.h"
 #include "spdk/util.h"
 #include "spdk/version.h"
 #include "spdk/log.h"
@@ -1879,6 +1880,18 @@ nvmf_ctrlr_set_features_number_of_queues(struct spdk_nvmf_request *req)
 	struct spdk_nvme_cmd *cmd = &req->cmd->nvme_cmd;
 	struct spdk_nvme_cpl *rsp = &req->rsp->nvme_cpl;
 	uint32_t count;
+
+	struct spdk_io_channel *ch;
+	struct spdk_nvmf_subsystem_pg_ns_info	*ns_info;
+	struct spdk_nvmf_poll_group *group = req->qpair->group;
+	assert(group != NULL && group->sgroups != NULL);
+
+	ns_info = &group->sgroups[ctrlr->subsys->id].ns_info[0];
+	ch = ns_info->channel;
+
+	uint32_t squeues = cmd->cdw11_bits.feat_num_of_queues.bits.nsqr;
+	uint32_t max_queue_depth = ctrlr->admin_qpair->transport->opts.max_queue_depth;
+	nvmf_ctrlr_channel_resize(squeues * max_queue_depth, ch);
 
 	SPDK_DEBUGLOG(nvmf, "Set Features - Number of Queues, cdw11 0x%x\n",
 		      req->cmd->nvme_cmd.cdw11);

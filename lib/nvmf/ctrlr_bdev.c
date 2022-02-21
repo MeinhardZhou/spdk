@@ -37,6 +37,7 @@
 #include "nvmf_internal.h"
 
 #include "spdk/bdev.h"
+#include "spdk/blob.h"
 #include "spdk/endian.h"
 #include "spdk/thread.h"
 #include "spdk/likely.h"
@@ -918,4 +919,12 @@ nvmf_bdev_ctrlr_zcopy_end(struct spdk_nvmf_request *req, bool commit)
 
 	/* The only way spdk_bdev_zcopy_end() can fail is if we pass a bdev_io type that isn't ZCOPY */
 	assert(rc == 0);
+}
+
+void nvmf_ctrlr_channel_resize(uint32_t max_ops, struct spdk_io_channel *ch)
+{
+	struct spdk_io_channel *bs_io_channel = spdk_bdev_channel_get_io_channel(ch);
+	int res = spdk_bs_resize_io_channel(max_ops, bs_io_channel);
+
+	SPDK_INFOLOG(nvmf, "Resize ctrlr bs channel res: %d\n", res);
 }

@@ -42,6 +42,7 @@
 	spdk_blob_close;
 	spdk_bs_alloc_io_channel;
 	spdk_bs_free_io_channel;
+	spdk_bs_resize_io_channel;
 	spdk_blob_io_write;
 	spdk_blob_io_read;
 	spdk_blob_io_writev;

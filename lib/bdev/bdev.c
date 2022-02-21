@@ -3515,6 +3515,13 @@ spdk_bdev_get_io_channel(struct spdk_bdev_desc *desc)
 	return spdk_get_io_channel(__bdev_to_io_dev(spdk_bdev_desc_get_bdev(desc)));
 }
 
+struct spdk_io_channel *
+spdk_bdev_channel_get_io_channel(struct spdk_io_channel *ch)
+{
+	struct spdk_bdev_channel *bdev_channel = spdk_io_channel_get_ctx(ch);
+	return bdev_channel->channel;
+}
+
 void *
 spdk_bdev_get_module_ctx(struct spdk_bdev_desc *desc)
 {

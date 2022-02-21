@@ -393,6 +393,7 @@ bool nvmf_ctrlr_dsm_supported(struct spdk_nvmf_ctrlr *ctrlr);
 bool nvmf_ctrlr_write_zeroes_supported(struct spdk_nvmf_ctrlr *ctrlr);
 void nvmf_ctrlr_ns_changed(struct spdk_nvmf_ctrlr *ctrlr, uint32_t nsid);
 bool nvmf_ctrlr_use_zcopy(struct spdk_nvmf_request *req);
+void nvmf_ctrlr_channel_resize(uint32_t max_ops, struct spdk_io_channel *ch);
 
 void nvmf_bdev_ctrlr_identify_ns(struct spdk_nvmf_ns *ns, struct spdk_nvme_ns_data *nsdata,
 				 bool dif_insert_or_strip);

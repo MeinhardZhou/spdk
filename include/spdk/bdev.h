@@ -735,6 +735,15 @@ uint64_t spdk_bdev_get_weighted_io_time(const struct spdk_bdev *bdev);
 struct spdk_io_channel *spdk_bdev_get_io_channel(struct spdk_bdev_desc *desc);
 
 /**
+ * Obtain an underlaying I/O channel for bdev io channel.
+ *
+ * \param channel desc Bdev channel.
+ *
+ * \return a ptr to bdev_channel->channel.
+ */
+struct spdk_io_channel *spdk_bdev_channel_get_io_channel(struct spdk_io_channel *channel);
+
+/**
  * Obtain a bdev module context for the block device opened by the specified
  * descriptor.
  *
